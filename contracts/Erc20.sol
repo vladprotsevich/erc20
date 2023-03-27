@@ -29,7 +29,7 @@ contract ERC20 is IERC20 {
         mint(initialAmount_, shop);
     }
 
-    function mint(uint amount, address shop) public onlyOwner {
+    function mint(uint amount, address shop) internal onlyOwner {
         balances[shop] += amount;
         totalTokens += amount;
 
