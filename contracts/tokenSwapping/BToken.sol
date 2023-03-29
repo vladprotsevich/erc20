@@ -10,11 +10,11 @@ contract BToken is ERC20, Ownable {
         _mint(msg.sender, initialSupply);
     }
 
-    function mintSomeTokensB(address _to, uint amount) external onlyOwner {
+    function mint(address _to, uint amount) external onlyOwner {
         _mint(_to, amount);
     }
 
-    function burnSomeTokensB(address _from, uint amount) external onlyOwner {
+    function burn(address _from, uint amount) external onlyOwner {
         _burn(_from, amount);
     }
 }

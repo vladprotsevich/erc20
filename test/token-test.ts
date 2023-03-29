@@ -23,7 +23,7 @@ describe("Exchange SmartContract", async() => {
         await tokenA.deployed();
 
         const Exchange = await ethers.getContractFactory("Exchange", owner);
-        exchange = await Exchange.deploy(tokenA.address);
+        exchange = await Exchange.deploy();
 
         await exchange.deployed();
     });
@@ -91,4 +91,16 @@ describe("Exchange SmartContract", async() => {
         await depositTokens(tokenAmount);
         await expect(withdraw(tokenAmount + 5)).to.be.revertedWith('Not enough tokens');
     })        
+
+    it("should return failure if user does not have an enough balance for withdraw", async () => {
+        await depositTokens(tokenAmount + 15);
+        await expect(withdraw(tokenAmount + 10)).to.be.revertedWith('Max transaction tokens amount is 20');
+    })
+
+    it("should return success if a few deposit transactions are valid", async () => {
+        await depositTokens(tokenAmount);
+        await depositTokens(tokenAmount);
+
+        expect(await tokenA.balanceOf(exchange.address)).to.eq(tokenAmount + tokenAmount)
+    })
 })
