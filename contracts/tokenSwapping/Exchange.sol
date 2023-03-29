@@ -11,11 +11,10 @@ import "./BToken.sol";
 
 contract Exchange is IExchange {
     using SafeERC20 for IERC20;
-
-    IERC20 private _tokenA;
-    BToken private _tokenB;
-    uint constant maxTransactionAmount = 20;
+    
     mapping (address => mapping (address => uint)) private balances;
+    uint constant maxTransactionAmount = 20;
+    BToken private _tokenB;
 
     constructor() {
         _tokenB = new BToken(0);
@@ -37,9 +36,8 @@ contract Exchange is IExchange {
     }
 
     function deposit(address tokenAddress, uint amount) external {
-        _tokenA = IERC20(tokenAddress);
         balances[msg.sender][tokenAddress] += amount;
-        _tokenA.safeTransferFrom(msg.sender, address(this), amount);
+        IERC20(tokenAddress).safeTransferFrom(msg.sender, address(this), amount);
 
         _tokenB.mint(msg.sender, amount * 10);
     }
@@ -48,7 +46,7 @@ contract Exchange is IExchange {
      validateTokenAmount(amount) {
         balances[msg.sender][tokenAddress] -= amount;
 
-        _tokenA.safeTransfer(msg.sender, amount);
+        IERC20(tokenAddress).safeTransfer(msg.sender, amount);
 
         _tokenB.burn(msg.sender, amount * 10);
     }
