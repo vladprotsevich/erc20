@@ -26,7 +26,8 @@ contract Exchange is IExchange {
         _;
     }      
 
-    modifier maxTransactionTokenAmount(uint amount) {
+    modifier validateTokenAmount(uint amount) {
+        require(amount > 0, "Token amount have to be more than 0");
         require(maxTransactionAmount >= amount, "Max transaction tokens amount is 20");
         _;
     }
@@ -44,7 +45,7 @@ contract Exchange is IExchange {
     }
 
     function withdraw(address tokenAddress, uint amount) external enoughTokensToWithdraw(tokenAddress, amount)
-     maxTransactionTokenAmount(amount) {
+     validateTokenAmount(amount) {
         balances[msg.sender][tokenAddress] -= amount;
 
         _tokenA.safeTransfer(msg.sender, amount);

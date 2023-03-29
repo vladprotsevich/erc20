@@ -97,6 +97,11 @@ describe("Exchange SmartContract", async() => {
         await expect(withdraw(tokenAmount + 10)).to.be.revertedWith('Max transaction tokens amount is 20');
     })
 
+    it("should return failure if user withdraw zero tokens", async () => {
+        await depositTokens(tokenAmount);
+        await expect(withdraw(0)).to.be.revertedWith('Token amount have to be more than 0');
+    })
+
     it("should return success if a few deposit transactions are valid", async () => {
         await depositTokens(tokenAmount);
         await depositTokens(tokenAmount);
