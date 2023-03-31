@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "./CustomIERC20.sol";
+import "./IERC20.sol";
 
 contract ERC20 is CustomIERC20 {
     uint totalTokens; 

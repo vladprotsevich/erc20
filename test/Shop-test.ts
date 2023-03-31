@@ -2,7 +2,7 @@ import { expect } from "chai"
 import { ethers } from "hardhat"
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ERC20, Shop } from "../typechain-types";
-import tokenJSON from "../artifacts/contracts/customERC20/CustomToken.sol/CustomToken.json"
+import tokenJSON from "../artifacts/contracts/customERC20/Token.sol/Token.json"
 import { Contract } from "ethers";
 import { TransactionResponse } from "@ethersproject/providers";
 
