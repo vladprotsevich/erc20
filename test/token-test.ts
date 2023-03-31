@@ -10,11 +10,13 @@ describe("Exchange SmartContract", async() => {
     let emitValue: number;
     let tokenAmount: number;
     let tokenRatio: number; 
+    let addressTokenB: string;
 
     beforeEach(async () => {
         emitValue = 50;
         tokenAmount = 15;
         tokenRatio = 10;
+
         [owner] = await ethers.getSigners();
 
         const TokenA = await ethers.getContractFactory("AToken", owner);
@@ -26,6 +28,7 @@ describe("Exchange SmartContract", async() => {
         exchange = await Exchange.deploy();
 
         await exchange.deployed();
+        addressTokenB = await exchange._addressTokenB();
     });
 
     async function depositTokens(tokenAmount: number) { // 1 token A === 10 token B
@@ -40,7 +43,6 @@ describe("Exchange SmartContract", async() => {
         await withdrawTrx.wait();
     }
 
-
     it("should check if owner\'s tokens balance on equal to emit value", async () => {
         const ownerBalance = await tokenA.balanceOf(owner.address)
         expect(ownerBalance).to.eq(emitValue)
@@ -48,14 +50,13 @@ describe("Exchange SmartContract", async() => {
 
     it("should return success if the values of tokens A and B are valid", async () => {
         await depositTokens(tokenAmount)
-
         const exchangeContractTokenABalance = await tokenA.balanceOf(exchange.address);
         expect(exchangeContractTokenABalance).to.eq(tokenAmount);
 
         const ownersTokenABalance = await tokenA.balanceOf(owner.address);
         expect(ownersTokenABalance).to.eq(emitValue - tokenAmount);
 
-        const ownersBTokenBalance = await exchange.balancesTokenB(owner.address)
+        const ownersBTokenBalance = await exchange.balances(owner.address, addressTokenB)
         expect(ownersBTokenBalance).to.eq(tokenAmount * tokenRatio);
     })
 
@@ -69,7 +70,7 @@ describe("Exchange SmartContract", async() => {
         const ownersTokenABalance = await tokenA.balanceOf(owner.address);
         expect(ownersTokenABalance).to.eq(emitValue);
 
-        const ownersBTokenBalance = await exchange.balancesTokenB(owner.address)
+        const ownersBTokenBalance = await exchange.balances(owner.address, addressTokenB)
         expect(ownersBTokenBalance).to.eq(0);
     })
 
@@ -83,7 +84,7 @@ describe("Exchange SmartContract", async() => {
         const ownersTokenABalance = await tokenA.balanceOf(owner.address);
         expect(ownersTokenABalance).to.eq(emitValue - 5);
 
-        const ownersBTokenBalance = await exchange.balancesTokenB(owner.address)
+        const ownersBTokenBalance = await exchange.balances(owner.address, addressTokenB)
         expect(ownersBTokenBalance).to.eq(5 * tokenRatio);
     })    
 

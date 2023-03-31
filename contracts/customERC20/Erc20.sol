@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.0;
 
-import "./IERC20.sol";
+import "./CustomIERC20.sol";
 
-contract ERC20 is IERC20 {
+contract ERC20 is CustomIERC20 {
     uint totalTokens; 
     address owner;
     mapping(address => uint) balances;
@@ -22,18 +22,18 @@ contract ERC20 is IERC20 {
         _;
     }
 
-    constructor(string memory name_, string memory symbol_, uint initialAmount_, address shop) {
+    constructor(string memory name_, string memory symbol_, uint initialAmount_) {
         _name = name_;
         _symbol = symbol_;
         owner = msg.sender;
-        mint(initialAmount_, shop);
+        mint(initialAmount_, msg.sender);
     }
 
-    function mint(uint amount, address shop) internal onlyOwner {
-        balances[shop] += amount;
+    function mint(uint amount, address account) internal onlyOwner {
+        balances[account] += amount;
         totalTokens += amount;
 
-        emit Transfer(address(0), shop, amount);
+        emit Transfer(address(0), account, amount);
     }
 
     function burn(address from, uint amount) external onlyOwner enoughTokens(from, amount) {

@@ -6,9 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract BToken is ERC20, Ownable {
-    constructor(uint initialSupply) ERC20("BToken", "B") {
-        _mint(msg.sender, initialSupply);
-    }
+    constructor() ERC20("BToken", "B") {}
 
     function mint(address _to, uint amount) external onlyOwner {
         _mint(_to, amount);
