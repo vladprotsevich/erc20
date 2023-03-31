@@ -3,7 +3,7 @@
 pragma solidity ^0.8.0;
 
 import { ERC20 } from "./Erc20.sol";
-import { CustomToken } from "./CustomToken.sol";
+import { Token } from "./Token.sol";
 
 contract Shop {
     ERC20 public token;
@@ -13,7 +13,7 @@ contract Shop {
     event Withdaw(uint indexed _amount);
 
     constructor() {
-        token = new CustomToken(address(this));
+        token = new Token(address(this));
         owner = payable(msg.sender);
     }
 
