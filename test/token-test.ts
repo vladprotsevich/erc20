@@ -1,23 +1,27 @@
 import { expect } from "chai"
 import { ethers } from "hardhat"
-import { AToken, Exchange } from "../typechain-types";
+import { AToken, CRT, Exchange } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { Contract } from "hardhat/internal/hardhat-network/stack-traces/model";
+import CRTJSON from "../artifacts/contracts/tokenSwapping/CRT.sol/CRT.json";
 
 describe("Exchange SmartContract", async() => {
     let owner: SignerWithAddress;
+    let collector: SignerWithAddress;
     let tokenA: AToken;
     let exchange: Exchange;
     let emitValue: number;
     let tokenAmount: number;
     let tokenRatio: number; 
     let addressTokenB: string;
+    let crt: any;
 
     beforeEach(async () => {
         emitValue = 50;
         tokenAmount = 15;
         tokenRatio = 10;
 
-        [owner] = await ethers.getSigners();
+        [owner, collector] = await ethers.getSigners();
 
         const TokenA = await ethers.getContractFactory("AToken", owner);
         tokenA = await TokenA.deploy(emitValue);
@@ -28,7 +32,10 @@ describe("Exchange SmartContract", async() => {
         exchange = await Exchange.deploy();
 
         await exchange.deployed();
+
         addressTokenB = await exchange._addressTokenB();
+
+        crt = new ethers.Contract(await exchange._nftCRT(), CRTJSON.abi, owner);
     });
 
     async function depositTokens(tokenAmount: number) { // 1 token A === 10 token B
@@ -109,4 +116,29 @@ describe("Exchange SmartContract", async() => {
 
         expect(await tokenA.balanceOf(exchange.address)).to.eq(tokenAmount + tokenAmount)
     })
+
+    it("should check on received nft after deposit", async () => {
+        expect(await crt.balanceOf(owner.address)).to.eq(0)
+        await depositTokens(tokenAmount);
+        expect(await crt.balanceOf(owner.address)).to.eq(1)
+    })
+
+    it("should be success if token owner address are equal to deposited user address", async () => {
+        await depositTokens(tokenAmount);
+        expect(await crt.ownerOf(1)).to.eq(owner.address);
+    })    
+
+    it("should be success if token owner address are not equal to another user address", async () => {
+        await depositTokens(tokenAmount);
+        expect(await crt.ownerOf(1)).to.not.eq(collector.address);
+    })        
+
+    it("should check metadata url on correctness", async () => {
+        await depositTokens(tokenAmount);
+        const tokenName = await crt.name();
+        const tokenSymbol = await crt.symbol();
+        console.log(tokenName)
+        const expectedTokenURI = `http://localhost:3000/api/token?tokenName=${tokenName}&tokenSymbol=${tokenSymbol}&tokenAddress=${tokenA.address.toLowerCase()}&depositedTokenAmount=${tokenAmount}`;
+        expect(await crt.tokenURI(1)).to.eq(expectedTokenURI)
+    })    
 })

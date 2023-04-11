@@ -8,18 +8,21 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./IExchange.sol";
 import "./BToken.sol";
+import "./CRT.sol";
 
 contract Exchange is IExchange {
     using SafeERC20 for IERC20;
     
     mapping (address => mapping (address => uint256)) public balances;
     BToken private immutable _tokenB; 
+    CRT public immutable _nftCRT;
     address public immutable _addressTokenB;
 
     uint8 constant maxTransactionAmount = 20;
 
-    constructor() {
+    constructor(){
         _tokenB = new BToken();
+        _nftCRT = new CRT();
         _addressTokenB = address(_tokenB);
     }
 
@@ -40,7 +43,9 @@ contract Exchange is IExchange {
 
         balances[msg.sender][_addressTokenB] += amount * 10;
         _tokenB.mint(msg.sender, amount * 10);
-        
+
+        _nftCRT.mintNFT(msg.sender, tokenAddress, amount);
+
         emit Deposit(msg.sender, address(this), tokenAddress, amount);
     }
 
