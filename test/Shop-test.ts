@@ -6,14 +6,14 @@ import tokenJSON from "../artifacts/contracts/customERC20/Token.sol/Token.json"
 import { Contract } from "ethers";
 import { TransactionResponse } from "@ethersproject/providers";
 
-describe("Shop", async () => {
+describe("Shop SmartContract", async () => {
     let owner: SignerWithAddress;
     let buyer: SignerWithAddress;
     let shop: Shop;
     let erc20: ERC20 | Contract;
     let tokenAmount: number;
     let trx: TransactionResponse;
-    
+
     beforeEach(async () => {
         [owner, buyer] = await ethers.getSigners();
 
@@ -30,21 +30,21 @@ describe("Shop", async () => {
             to: shop.address,
         });
 
-        await trx.wait()        
+        await trx.wait()
     })
 
     it("should have an owner and a token", async () => {
         expect(await shop.owner()).to.eq(owner.address);
 
         expect(await shop.token()).to.be.properAddress;
-    })    
+    })
 
     it("allows to buy", async () => {
         expect(await erc20.balanceOf(buyer.address)).to.eq(tokenAmount)
 
         await expect(() => trx).
           to.changeEtherBalance(shop, tokenAmount)
-              
+
         await expect(trx)
           .to.emit(shop, "Bought")
           .withArgs(tokenAmount, buyer.address)

@@ -12,24 +12,25 @@ import "./CRT.sol";
 
 contract Exchange is IExchange {
     using SafeERC20 for IERC20;
-    
-    mapping (address => mapping (address => uint256)) public balances;
-    BToken private immutable _tokenB; 
+
+    BToken private immutable _tokenB;
     CRT public immutable _nftCRT;
     address public immutable _addressTokenB;
 
-    uint8 constant maxTransactionAmount = 20;
+    mapping (address => mapping (address => uint256)) public balances;
 
-    constructor(){
+    uint8 constant maxTransactionAmount = 25;
+
+    constructor() {
         _tokenB = new BToken();
-        _nftCRT = new CRT();
+        _nftCRT = new CRT(msg.sender);
         _addressTokenB = address(_tokenB);
     }
 
     modifier enoughTokensToWithdraw(address tokenAddress, uint256 amount) {
         require(balances[msg.sender][tokenAddress] >= amount, "Not enough tokens");
         _;
-    }      
+    }
 
     modifier validateTokenAmount(uint256 amount) {
         require(amount > 0, "Token amount have to be more than 0");
@@ -39,12 +40,14 @@ contract Exchange is IExchange {
 
     function deposit(address tokenAddress, uint256 amount) external {
         balances[msg.sender][tokenAddress] += amount;
+
         IERC20(tokenAddress).safeTransferFrom(msg.sender, address(this), amount);
 
         balances[msg.sender][_addressTokenB] += amount * 10;
+
         _tokenB.mint(msg.sender, amount * 10);
 
-        _nftCRT.mintNFT(msg.sender, tokenAddress, amount);
+        _nftCRT.mint(msg.sender, tokenAddress, amount);
 
         emit Deposit(msg.sender, address(this), tokenAddress, amount);
     }
